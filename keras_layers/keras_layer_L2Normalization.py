@@ -46,13 +46,13 @@ class L2Normalization(Layer):
         http://cs.unc.edu/~wliu/papers/parsenet.pdf
     '''
 
-    def __init__(self, gamma_init=20, **kwargs):
+    '''def __init__(self, gamma_init=20, **kwargs):
         if K.image_data_format() == 'channels_last':
             self.axis = 3
         else:
             self.axis = 1
         self.gamma_init = gamma_init
-        super(L2Normalization, self).__init__(**kwargs)
+        super(L2Normalization, self).__init__(**kwargs)'''
 
     '''def build(self, input_shape):
         self.input_spec = [InputSpec(shape=input_shape)]
@@ -61,16 +61,17 @@ class L2Normalization(Layer):
         self.trainable_weights = [self.gamma]
         super(L2Normalization, self).build(input_shape)'''
 
+    def __init__(self, gamma_init=20, **kwargs):
+        self.axis = 3
+        self.gamma_init = gamma_init
+        super(L2Normalization, self).__init__(**kwargs)
+
     def build(self, input_shape):
         self.input_spec = [InputSpec(shape=input_shape)]
-        gamma = self.gamma_init * np.ones((input_shape[self.axis],))
-        self.gamma = K.variable(gamma, name='{}_gamma'.format(self.name))
-        self._trainable_weights.append(self.gamma)
-
-        #initializer=tf.keras.initializers.Ones()
-        #gamma = self.gamma_init * initializer(shape=(input_shape[self.axis],))
-        #ipdb.set_trace()
-        #self.gamma=self.add_weight(shape=gamma.shape, initializer=gamma, name='{}_gamma'.format(self.name), trainable=True)
+        self.gamma = self.add_weight(name='{}_gamma'.format(self.name),
+                                     shape=(input_shape[self.axis],),
+                                     initializer=tf.keras.initializers.Constant(value=self.gamma_init),
+                                     trainable=True)
         super(L2Normalization, self).build(input_shape)
 
     def call(self, x, mask=None):
